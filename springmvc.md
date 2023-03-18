@@ -1,10 +1,12 @@
-# SpringMVC 学习
+# SpringMVC 复习整理
 
-1. 什么是SpringMVC？
+## 1、 搭建第一springmvc 框架结构
+
+### 1.1 什么是SpringMVC？
 
 ​						它是基于MVC开发模式的框架,用来优化控制器.它是Spring家族的一员.它也具备IOC和AOP.
 
-1. 什么是MVC?
+###  1.2 什么是MVC?
 
 ​						 它是一种开发模式,它是模型视图控制器的简称.所有的web应用都是基于MVC开发.
 
@@ -14,13 +16,14 @@
 
 ​						C:控制器,它是用来接收客户端的请求,并返回响应到客户端的组件,Servlet就是组件													
 
-1. SpringMVC框架特点有什么？
+### 1.3 SpringMVC框架特点有什么？
 
-	  1)轻量级,基于MVC的框架
-	  2)易于上手,容易理解,功能强大
-	  3)它具备IOC和AOP
-	  4)完全基于注解开发
-1. 基于注解的SpringMVC框架开发的步骤
+  1)轻量级,基于MVC的框架
+  2)易于上手,容易理解,功能强大
+  3)它具备IOC和AOP
+  4)完全基于注解开发
+
+### 1.4 基于注解的SpringMVC框架开发的步骤
 
 ​				第一步new一个子模块,选择webapp模板.
 
@@ -181,3 +184,276 @@ public class demo2 {
 `<a href="${pageContext.request.contextPath}/demo.action">访问服务器</a>`
 
 此注解可以加在类上,相当于是包名(虚拟路径),区分不同类中相同的action的名称
+
+## 2、SpringMVC 注解@RequestMapping
+
+它用于将HTTP请求映射到相应的处理程序方法上,		
+
+具体来说，@RequestMapping注解用于将一个或多个URL路径（例如"/home"或"/home/{id}"）映射到一个特定的处理程序方法。在Spring MVC中，处理程序方法可以是一个控制器类中的任何公共方法。
+
+```java
+@Controller
+public class HomeController {
+
+    @RequestMapping("/")
+    public String index() {
+        return "index";
+    }
+
+    @RequestMapping("/home")
+    public String home() {
+        return "home";
+    }
+
+    @RequestMapping("/home/{id}")
+    public String homeWithId(@PathVariable("id") int id) {
+        // handle request with id parameter
+        return "home";
+    }
+}
+
+```
+
+在上面的代码中，我们有一个名为HomeController的控制器类，它包含三个使用@RequestMapping注解的处理程序方法。第一个方法将根路径（"/"）映射到index视图，第二个方法将"/home"路径映射到home视图，第三个方法将"/home/{id}"路径映射到home视图，并将路径中的"id"参数作为方法参数。
+
+当用户请求这些路径之一时，Spring MVC将查找匹配的@RequestMapping注解，并将请求转发到相应的处理程序方法。处理程序方法然后处理请求并返回相应的视图名称。在这个例子中，Spring MVC将找到HomeController类并将请求发送到适当的方法，该方法将返回相应的视图名称。
+
+### 2.1 SpringMVC  优化的内容
+
+![image-20230318190440161](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318190440161.png)
+
+由客户端发送请求到one.action,然后经过springMVC优化处理后返回结果给客户端。
+
+### 2.2 数据提交的5种方式
+
+#### 2.2.1 单个数据提交方式
+
+<font color='red'>注意此处表单种的name属性必须于controller中的形式参数名称一致</font>
+
+- index.jsp GET 方式提交中文不会乱码，原因Tomcat8以后对GET请求能处理中文，其他请求如POST暂时会出现乱码。
+
+​			
+
+```jsp
+<%@ page import="org.w3c.dom.css.CSSStyleRule" %><%--
+  Created by IntelliJ IDEA.
+  User: 23705
+  Date: 2023/3/18
+  Time: 19:59
+  To change this template use File | Settings | File Templates.
+--%>
+
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+//获取项目根路径
+String baseString = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
+%>
+<html>
+<head>
+    <base href="<%=baseString%>">
+    <title>首页</title>
+</head>
+<body>
+<h2>五种数据提交方式</h2>
+<hr>
+<h3>单个数据提交</h3>
+<form action="one.action" method="get">
+    姓名：<input type="text" value="" name="name" placeholder="请输入用户名">
+    年龄：<input type="text" name="age" value="" placeholder="请输入用年龄">
+    <button type="submit">提交</button>
+</form>
+</body>
+</html>
+
+```
+
+
+
+- 编写oneController
+
+```java
+package edu.beihua;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class oneController {
+    @RequestMapping("/one")
+    public String toOne(String name,int age){
+        System.out.println(name+"\t"+(age+100));
+        return "main";
+    }
+}
+
+```
+
+
+
+- 在webapp下新建admin文件夹，在其中建立main.jsp
+
+```jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: 23705
+  Date: 2023/3/18
+  Time: 20:19
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>数据请求方式</title>
+</head>
+<body>
+<h3 style="color: red">主页main………………</h3>
+</body>
+</html>
+
+```
+
+
+
+- 结果
+
+![image-20230318202957261](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318202957261.png)
+
+![image-20230318203014772](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318203014772.png)
+
+![image-20230318203025695](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318203025695.png)
+
+#### 2.2.2 以对象方式传参数
+
+<font color='red'>此时表单中的name属性必须与实体对象的属性名一致，springmvc才会自动封装存入对象中.</font>
+
+- 编写controller类
+
+```java
+ @RequestMapping("/two")
+    public String toOne(User user){
+        System.out.println("姓名："+ user.getUname()+"\t年龄: "+(user.getUage()+100));
+        return "main";
+    }
+```
+
+- 编写index表单
+
+```jsp
+<hr>
+<h3>单个数据提交</h3>
+<form action="two.action" method="get">
+    姓名：<input type="text" value="" name="uname" placeholder="请输入用户名">
+    年龄：<input type="text" name="uage" value="" placeholder="请输入用年龄">
+    <button type="submit">提交</button>
+</form>
+```
+
+- 编写实体类User
+
+```java
+public class User {
+    private String uname;
+    private int uage;
+
+    public User() {
+    }
+}
+
+//省略构造方法 set/get方法
+```
+
+当控制器方法需要接收参数时，Spring MVC会根据参数类型和方法参数名字匹配请求参数，并将请求参数转换为方法参数类型。Spring MVC框架会根据Java Bean的属性名字匹配请求参数，并将请求参数转换为Java Bean属性的类型。Spring MVC框架使用Java Bean的Setter方法将请求参数的值设置到Java Bean的属性中。
+
+#### 2.2.3 动态占位符提交数据
+
+<font color='red'>仅限于超链接或地址拦提交数据.它是一杠一值,一杠一大括号,使用注解@PathVariable来解析</font>`@PathVariable` 是 Spring Framework 中的一种注解，用于将 RESTful web 服务请求的 URI 中的变量映射到控制器中处理请求的方法参数上。
+
+这里，`@PathVariable` 注解用于 `toThree` 方法的 `id` 参数上，将 URI 中的 `{name}` 变量映射到方法参数上。`name` 参数将被实际从 URI 中提取的 ID 值填充。
+
+- 编写index
+
+```jsp
+<hr>
+<a href="/three/张撒旦/67.action">动态占位符传参</a>
+```
+
+- 编写controller
+
+```java
+ @RequestMapping("/three/{name}/{age}")
+    //即使是路径中{}中的名字与形参名字一样，springmvc也不能封装入形参、
+    //必须使用@@PathVariable()
+    public String toThree(@PathVariable() String name,@PathVariable() int age){
+        System.out.println("通过动态占位符传入参数");
+        System.out.println("姓名："+ name+"\t年龄: "+(age+100));
+        return "main";
+    }
+```
+
+- 结果
+
+![image-20230318210246921](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318210246921.png)
+
+#### 2.2.4 请求参数映射
+
+此处情况：网页中的参数与controller中的方法不一样时,使用@RequestParam来解析并装入参数。
+
+- 编写index
+
+```jsp
+<hr>
+<form action="two.action" method="get">
+    姓名：<input type="text" value="" name="username" placeholder="请输入用户名">
+    年龄：<input type="text" name="userage" value="" placeholder="请输入用年龄">
+    <button type="submit">提交</button>
+</form>
+```
+
+
+
+- 编写controller
+
+```java
+@RequestMapping("/four")
+public String toFour(@RequestParam("username") String name, @RequestParam("userage") int age){
+    System.out.println("使用RequestParam"+"传入参数");
+    System.out.println("姓名："+ name+"\t年龄: "+(age+100));
+    return "main";
+}
+```
+
+- 结果
+
+![image-20230318211639836](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318211639836.png)
+
+#### 2.2.5  手工提取方式
+
+通过HttpServletRequest获取请求参数
+
+- 编写controller
+
+```java
+@RequestMapping("/five")
+public String tofive(HttpServletRequest request){
+    System.out.println("HttpServletRequest"+"获取传入参数");
+    System.out.println("姓名："+request.getParameter("name")+"\t年龄: "+((Integer.parseInt(request.getParameter("age")))+100));
+    return "main";
+}
+```
+
+- 编写index
+
+```jsp
+<hr>
+<form action="/five.action" method="get">
+    姓名：<input type="text" value="" name="name" placeholder="请输入用户名">
+    年龄：<input type="text" name="age" value="" placeholder="请输入用年龄">
+    <button type="submit">提交</button>
+</form>
+```
+
+- 结果
+
+![image-20230318212335692](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318212335692.png)
+
+## 3、 中文编码设置
