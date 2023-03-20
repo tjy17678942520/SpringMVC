@@ -457,3 +457,121 @@ public String tofive(HttpServletRequest request){
 ![image-20230318212335692](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230318212335692.png)
 
 ## 3、 中文编码设置
+
+- 配置过滤器
+
+在src/main/webapp/WEB-INF/web.xml加上字符编码过滤器
+
+```xml
+ <!--配置过滤器-->
+    <filter>
+        <filter-name>encoding</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <!--配置参数-->
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>forceRequestEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>forceResponseEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>encoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+```
+
+## 4、 action方法返回值
+
+- String：客户端资源地址，自动拼接前缀和后缀，可以屏蔽自动字符拼接，可以指定返回的路径。
+- Object：返回json格式的对象。自动将对象或者集合转换成json，使用的Jackson工具进行转换，必须添加jackson的依赖，一般用于ajax请求。
+- void：无返回值类型，一般用于ajax请求。
+- 基本数据类型：用于ajax请求
+- ModelAndView：返回数据和视图，现在不常见。
+
+## 5、ajax请求应用
+
+- 搭建项目（略），在pom添加jackson依赖
+
+```xml
+ <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.9.8</version>
+    </dependency>
+```
+
+- 在webapp目录下新建js目录,添加jQuery函数库，https://code.jquery.com/jquery-3.6.4.js
+- 在index.jsp页面上导入函数库
+
+```html
+ <script type="text/javascript" src="js/jquery-3.6.4.js"></script>
+```
+
+- index界面点击时间在jQuery入口函数中
+
+```jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: 23705
+  Date: 2023/3/20
+  Time: 22:52
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<html>
+<head>
+    <title>Title</title>
+    <script type="text/javascript" src="js/jquery-3.6.4.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#senBtn").click(function () {
+                $.ajax({
+                    url:"${pageContext.request.contextPath}/list.do",
+                    type:"POST",
+                    dataType:"json",
+                    data:{
+                        na:"我是来测试的"
+                    },
+                    success:function (res) {
+                        var s = '';
+                        $.each(res,function (i,stu) {
+							//此处实际上调用了实体类Sudent的get方法，在实体类中必须实现，名字必须为
+                            //一致
+                            s += stu.name +"---" + stu.age + "<br>";
+                        });
+
+                        //回显数据
+                        $("#show-box").html("<hr>"+s);
+                    }
+                })
+            })
+        });
+    </script>
+</head>
+<body>
+<a id="senBtn">点击访问服务器返回数据</a>
+<div id="show-box"></div>
+</body>
+</html>
+
+```
+
+- 在action上添加注解@ResponseBody,用来处理ajax请求， //处理ajax请求,一定要加@ResponseBody
+- 在springmvc.xml文件中添加注解驱动<mvc:annotationdriven/>,它用来解析@ResponseBody注解
+
+> ​	` <mvc:annotation-driven></mvc:annotation-driven`>
+
+## 6、请求转发与重定向的区别
+
+- 四种跳转方式
