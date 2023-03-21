@@ -575,3 +575,33 @@ public String tofive(HttpServletRequest request){
 ## 6、请求转发与重定向的区别
 
 - 四种跳转方式
+
+## github 在idea中推拉代码过程中遇到的问题集合
+
+1. ![image-20230321065639457](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230321065639457.png)
+
+```sh
+$ git config --global http.sslVerify 'true'
+
+```
+
+解决了一个但是又出现了一个登陆问题
+
+![image-20230321072046559](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230321072046559.png)
+
+```sh
+取消全局代理：
+git config --global --unset http.proxy
+ 
+git config --global --unset https.proxy
+```
+
+![image-20230321073135282](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230321073135282.png)
+
+```sh
+git config --global --unset http.proxy
+
+git config --global --unset https.proxy
+
+```
+
