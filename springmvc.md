@@ -574,7 +574,300 @@ public String tofive(HttpServletRequest request){
 
 ## 6、请求转发与重定向的区别
 
+![image-20230321213612451](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230321213612451.png)
+
 - 四种跳转方式
+
+​			从本质上来说只是两种请求，请求转发和重定向，只不过是他们两个的衍生出的请求方式。请求转发就是基于服务器的转发，客户端的地址不会改变，而重定向是基于客户端的请求，地址栏会做出相应的的改变。
+
+- 请求转发：当一个请求发送到服务器时，<font color='red'>服务器</font>可以将这个<font color='red'>请求转发</font>给另外一个<font color='red'>资源（如Servlet、JSP等）</font>，并且把原始请求的参数等信息传递给这个资源进行处理。在这个过程中，浏览器并不知道服务器做了什么，**浏览器发送的URL地址不会改变**。**在服务器内部进行的，因此转发速度比较快**。
+- 重定向：当一个**请求发送到服务器时**，**服务器可以告诉浏览器将请求的页面重定向到另一个页面**。这个过程中，**服务器会发送一个特殊的响应给浏览器，告诉浏览器访问新的URL地址**。因为浏览器需要重新向新的地址发送请求，所以重定向会导致页面跳转比较慢，同时也<font color='red'>会改变浏览器的地址栏的URL地址</font>。
+
+```java
+ @RequestMapping("/one")
+    public String one(){
+        System.out.println("默认的请求转发！");
+        //使用视图解析器拼接前后缀进行页面跳转
+        return "main";
+    }
+
+    @RequestMapping("/two")
+    public String two(){
+        System.out.println("请求转发action跳转");
+        //forward:字符串可以屏蔽前缀和后缀的拼接.实现请求转发跳转
+        //不加上的话会拼接为：/admin/other.do.jsp
+        return "forward:/other.do";
+    }
+
+
+    @RequestMapping("/three")
+    public String three(){
+        System.out.println("默认重定向跳转界面");
+        //forward:字符串可以屏蔽前缀和后缀的拼接.实现请求转发跳转
+        //不加上的话会拼接为：/admin/other.do.jsp
+        return "redirect:/other.do";
+    }
+
+    @RequestMapping("/four")
+    public String four(){
+        System.out.println("默认重定向跳转界面");
+        //redirect:字符串可以屏蔽前缀和后缀的拼接.实现请求转发跳转
+        return "redirect:/admin/main.jsp";
+    }
+
+    @RequestMapping("/five")
+    public String five(){
+        System.out.println("这是随便跳.......");
+
+        return "forward:/fore/login.jsp";
+    }
+```
+
+## 7、SpringMVC的默认参数
+
+​	也就是说在controller层的方法中隐含的参数，可以当作形式参数传入，直接使用不需要创建。
+
+- HttpServletRequest 
+- HttpServletResponse
+- HttpSession
+- Model
+- Map
+- ModelMap
+
+<font color='red'>注意：Map，Model，ModelMap和request一样，都使用请求作用域进行数据传递，服务器必须是请求转发。</font>
+
+## 8、springmvc的执行流程
+
+![image-20230322211028418](C:\Users\23705\AppData\Roaming\Typora\typora-user-images\image-20230322211028418.png)
+
+## 9、日期处理方式
+
+- 日期提交处理
+
+  - 单个日期处理
+
+    ```html
+    <form action="/date.do" method="POST">
+        时间: <input type="date" name="data">
+        <button type="submit">提交</button>
+    </form>
+    ```
+
+    控制其中使用<font color='red'>@DateTimeFormat()</font>注解格式化时间，只能放在形参前，记得在springmvc配置文件中配置注解支持
+
+    `<mvc:annotation-driven></mvc:annotation-driven>`
+
+    ```java
+    @RequestMapping("/date")
+    public String toShow(  @DateTimeFormat(pattern = "yyyy-MM-dd")  Date data){
+            System.out.println(data);
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd").format(data));
+            return "show";
+        }
+    ```
+
+    
+
+  - 类中全局日期处理(该方式不需要加任何的东西)
+
+  ```java
+  //注册java全局时间拦截
+  @InitBinder
+      public void initDate(WebDataBinder dataBinder){
+          dataBinder.registerCustomEditor(Date.class,new CustomDateEditor(
+                  new SimpleDateFormat("yyyy-MM-dd"),true
+          ));
+      }    
+  
+  
+  @RequestMapping("/date")
+      public String toShow(Date data){
+          System.out.println(data);
+          System.out.println(new SimpleDateFormat("yyyy-MM-dd").format(data));
+          return "show";
+      }
+  ```
+
+- 日期现实处理
+
+  - 在页面上显示好看的日期,必须使用JSTL.
+
+    1. 添加依赖jstl
+
+       ```xml
+       <dependency>
+             <groupId>jstl</groupId>
+             <artifactId>jstl</artifactId>
+             <version>1.2</version>
+           </dependency>
+       ```
+
+       
+
+    2. 在jsp页面上引入标签库
+
+    ```jsp
+    <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+    ```
+
+    jsp界面遍历
+
+    ```jsp
+    <table border="1" style="margin: auto;text-align: center;"  cellpadding="0" width="800" >
+        <thead>
+            <th>姓名</th>
+            <th>年龄</th>
+            <th>出生年月</th>
+        </thead>
+    
+        <tbody>
+            <c:forEach items="${list}" var="stu">
+                <tr>
+                    <td>${stu.name}</td>
+                    <td>${stu.age}</td>
+                    <%--没有进行时间格式化处理--%>
+                    <%--<td>${stu.birthday}</td>--%>
+                    <%--对时间进行转化格式--%>
+                    <td><fmt:formatDate value="${stu.birthday}" pattern="yyyy-MM-dd"></fmt:formatDate></td>
+                </tr>
+            </c:forEach>
+        </tbody>
+    </table>
+    ```
+
+    controller代码
+
+    ```java
+       private SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        @RequestMapping("/student")
+        public String getStudent(HttpServletRequest request) throws ParseException {
+            Student stu0 = new Student("张三",78,sf.parse("2009-12-3"));
+            Student stu1 = new Student("里斯",56,sf.parse("2003-2-23"));
+            Student stu2 = new Student("王五",26,sf.parse("2013-2-4"));
+    
+            List<Student> students = new ArrayList<>();
+            students.add(stu0);
+            students.add(stu1);
+            students.add(stu2);
+    
+            request.setAttribute("list",students);
+    
+            return "show";
+    
+    
+        }
+    ```
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## github 在idea中推拉代码过程中遇到的问题集合
 
